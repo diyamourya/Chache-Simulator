@@ -1,0 +1,182 @@
+\documentclass [ 12pt, letterpaper, twoside] {article}
+\usepackage [utf8] {inputenc }
+\usepackage{graphicx} 
+\graphicspath{ {/home/user/images/} }
+\title {\textbf{Implement and Compare Victim Caches and Skewed Associative Caches }}
+\author {\textbf{Diya Mourya – (18114021) }}
+\date {\textbf{31 October 2019}}
+
+\begin {document}
+
+\begin {titlepage}
+\maketitle
+\end {titlepage}
+
+\begin {abstract}
+Speed is the major limiting factor for the performance of the computer with which the data can be moved between processor and memory. So cache memory was placed between the main memory and processor. Several mapping techniques were used to map data into cache memory. Since L1 cache is direct mapped it has one-to-one relation, different address of data will conflict for same location in L1 cache and hence there is a miss called conflict misses which leads to miss penalty thus decreasing the performance.
+
+In this project, a new two cache schemes like victim cache and skewed associative cache were implementeted and compared with the help of verilog and code in suitable programing language to compare the cache based enhancements. Victim cache is fully associative cache and its size is small compared to L1 cache, it is placed next to L1 instruction cache to hold the evicted block because of conflict miss or replaced block from L1 cache. Another new cache scheme is skewed associative cache, where two mapping function is used to map the address into different banks with different location which is unlike in conventional cache scheme.
+\end {abstract}
+
+\textbf{\large I. Cache Memory }
+
+Now a days computers are designed to operate with different types of memory organized in a memory hierarchy. In such memory hierarchies, as the distance of the memories increases from the processor, as the distance from the processor increases, so that the access time for each memory increases. Closest to the CPU is the Cache Memory. Cache memory is fast but quite small; it is used to store small amounts of data that have been accessed recently and are likely to be accessed again soon in the future. Data is stored here in blocks, each containing a number of words. To keep track of which blocks are currently stored in Cache, and how they relate to the rest of the memory, the Cache Controller stores identifiers for the blocks currently stored in Cache. These include the index, tag, valid and dirty bits, associated with a whole block of data. To access an individual word insidera block of data, a block offset is used as an address into the block itself. Using these identifiers, the Cache Controller can respond to read and write requests issued by the CPU, by reading and writing data to specific blocks, or by fetching or writing out whole blocks to the larger, slower Main Memory. Figure 1 shows a block diagram for a simple memory hierarchy consisting of CPU, Cache (including the Cache controller and the small, fast memory used for data storage), Main Memory Controller and Main Memory proper.
+
+\includegraphics[width=15cm, height=7cm]{/home/diya/Desktop/images/IMG_20191031_161802.eps}
+
+Fig 1: Memory Hierarchy Block Diagram
+When the processor request data, the cache checks to see if that address is present in cache memory or not, if address present in cache then cache hitoccurs else it will cache miss. If the cache contains the memory location, then the cache hit occurs. If the cache does not contain the memory location, then the cache miss occurs.
+
+\textbf{\large II. Victim Cache }
+
+Cache memory is extremely fast memory that is built into a computer’s central processing unit (CPU), or located next to it ona separate chip. The CPU uses cache memory to store instructions that are repeatedly required to run programs, improving overall system speed. The CPU can process data much faster by avoiding the bottleneck created by the system bus. Cache built into the CPU itself isreferred to as cache. Cache that is built into the CPU is faster than separate cache, running at the speed of the microprocessor itself. However, separate cache is still roughly twice as fast as Random Access Memory (RAM). Cache is more expensive than RAM, but it is well worth getting a CPU and motherboard with built-in cache in order to maximize system performance. So,cache plays very important role in processing of CPU to be fast and for this the optimization of cache is also very necessary. 
+
+\includegraphics[width=15cm, height=7cm]{/home/diya/Desktop/images/IMG_20191031_161733.eps}
+
+Fig 2: Memory Hierarchy for the victim caching scheme
+
+Figure 1 is a simple block diagram illustrating the location of the victim cache in the overall memory hierarchy. The victim cache can be considered to be part of the L1 cache system. The next lower level of the memory hierarchy can be an L2 cache or the main memory.
+
+The first-level (Ll) cache consists of a direct-mapped main cache and a small fully-associative victim cache. Aline buffer is included so that sequential accesses to words in the same cache block (line) do not result in more than one access to the cache, thus preventing repeated updates of state bits in cache. Upon the first access to a cache line, the entire line is brought into the line buffer in parallel with the execution in the CPU; subsequent accesses to words in the same line are satisfied from the line buffer and cause no update of state bits in cache. Lines are replaced in the victim cache according to the LRU (least recently used)algorithm. The next lower level of the memory hierarchy can be main memory. On every memory access, the line buffer, main cache, and the victim cache are searched in parallel. If the line is found in the line buffer, the instruction is fetched from there and no other action is necessary. Otherwise, three different cases must be considered:
+1. Hit in main cache: If the word is found in the direct-mapped cache, it is delivered to the CPU and the entire line containing the accessed word is brought into the line buffer.
+2. Missin main cache, hit in victim cache: In this case, the word is fetched from the victim cache into the line buffer and forwarded to the CPU.
+3. Miss in both main and victim caches: If the word is not found both in the main cache and the victim cache, it must be fetched from the next level of the hierarchy.
+
+Cache Hits: When the cache contains the information requested, the transaction is said to be a cache hit.
+Cache Miss:When the cache does not contain the information requested, the transaction is said to be a cache miss.
+
+\includegraphics[width=15cm, height=7cm]{/home/diya/Desktop/images/IMG_20191031_162030.eps}
+
+Fig 3: Victim Cache Operation
+
+Figure 3 suggests the operation of the victim cache. The data is arranged in such a way that the same line is never present in both the L1 cache and the victim cache at the same time. There are two cases to consider for managing the movement of data between the two caches:
+Case 1: Processor reference to memory misses in both the L1 cache and the victim cache.
+a. The required block is fetched from main memory (or the L2 cache if present) and placed into the L1 cache.
+b. The replaced block in the main cache is moved to the victim cache. There is no replacement algorithm. With a direct-mapped cache, the line to be replaced is uniquely determined.
+c. The victim cache can be viewed as a FIFO queue or, equivalently, a circular buffer. The item that has been in the victim cache the longest is removed to make room for the incoming line. The replaced line is written back the main memory if it is dirty (has been updated).
+Case 2: Processor reference to memory misses the direct-mapped cache but hits the victim cache.
+a. The block in the victim cache is promoted to the direct-mapped cache.
+b. The replaced block in the main cache is swapped to the victim cache.
+
+\textbf{\large III. Skewed-associative Caches }
+
+It is new organization for a multi-bank cache: the skewed associative cache. A two-way skewed-associative cache has the same hardware complexity as a two-way set-associative cache. It typically exhibits the same hit ratio as a four-way set-associative caches.
+
+Skewing on caches: Principle
+
+A set-associative cache is illustrated by Figure 4: a X way set-associative cache is built with X distinct banks. A line of data with base address D may be physically mapped on physical line f(D) in any of the distinct banks. This vision of a set-associative cache fits with its physical implementation: X banks of static memory RAMs.
+         We propose a very slight modification in this design as shown in Figure 5:
+        
+        Different mapping functions are used for the distinct cache banks i.e., a line of data with base address D may be mapped on physical line f0(D) in cache bank 0 or in f1(D) in cache bank 1, etc.
+
+We call a multi-bank cache with such a mapping of the lines onto the distinct banks: a skewed associative cache.
+
+\includegraphics[width=18cm, height=9cm]{/home/diya/Desktop/images/IMG_20191031_162118.eps}
+
+Fig 4: A two-way associative cache ( two distinct cache banks)
+
+\includegraphics[width=18cm, height=9cm]{/home/diya/Desktop/images/IMG_20191031_162140.eps}
+
+A line of data is mapped at distinct addresses in the distinct banks of the cache
+Fig 5: A two-way skewed-associative cache
+
+\textbf{\large Choosing a skewing function : }
+
+In a usual X-way set-associative cache, when (X+1) lines of data contend for the same set in the cache, they are all conflicting for the same place in the X cache banks: one of the lines must be rejected from the cache (Figure 6).
+We have introduced skewed-associative caches to avoid this situation by scattering the data: mapping functions can be chosen such that whenever two lines of data con ict for a single location in cache bank i , they have very low probability to con ict for a location in cache bank j (Figure 7). Ideally, mapping functions may be chosen such as the set of lines that might be mapped on a cache line of bank i will be equaly distributed over all the lines in the other cache banks.
+
+Many applications exhibit spatial locality, therefore the mapping functions must be chosen so as to avoid having two “almost" neighbor lines of data con icting for the same physical line in cache bank i .
+The different mapping functions must respect a certain form of local dispersion on a single bank; the mapping functions fi must limit the number of con icts when mapping any region of consecutive lines of data in a single cache bank i .
+
+Simple Hardware Implementation:
+
+A key issue for the overall performance of a microprocessor is the pipeline length. Using distinct mapping functions on the distinct cache banks will have no effects on the performance, as long as the computations of the mapping functions can be added to a non critical stage in the pipeline and do not lengthen the pipeline cycle. Let us notice that in most of the new generation microprocessors, the address computation stage is not the critical stage in the pipeline (e.g. in TI SuperSparc, two cascaded ALU operations may be executed in a single cycle).
+In order to achieve this, we have to chose mapping functions whose hardware implementations are very simple: as few gate delays as possible.
+ We exhibited a family of four functions fi mapping which respects the previous properties. For
+an address A , each bit of fi ( A ) is obtained by Exclusive-ORing at most 4 bits of the binary decomposition of A .
+
+\textbf{\large Skewing on two way associative caches : }
+ 
+\includegraphics[width=18cm, height=9cm]{/home/diya/Desktop/images/IMG_20191031_161853.eps}
+
+Fig 6: 3 data conflicting for a single set on a two-way set-associative cache 
+
+\includegraphics[width=18cm, height=9cm]{/home/diya/Desktop/images/IMG_20191031_161921.eps}
+
+Fig 7: Data conflicting for a cache line on bank 0, but not on bank 1 on a skewed-associative cache
+
+Let us consider the particular case of 64 bytes lines and 4096 bytes cache banks. ( an,...,a0) is the binary representation of the address. A possible organization for a two-way skewed associative cache is illustrated in Figure 8.
+The skewing functions used in this example verify the previously mentioned criterions for “good" skewing functions.
+On this example, only three two entries XOR gates are added to the classical cache bank design. In the proposed design, the access time to the cache bank is only slightly increased by the delay for crossing a XOR gate when using skewing functions.
+We believe that the access time may even be exactly the same as in a classical two-way set associative cache:
+1. In a microprocessor, when using a one-cycle access cache, the cache hit time generally determines the machine cycle. The address computation is performed in a less critical stage: the XOR gates may be added at the end of that stage.
+2. When using a pipelined cache, row selection may be done in the second cycle.
+
+A formal description of the family of skewing functions:
+
+Let 2c be the size of the line.
+Let 2n be the number of cache lines in a cache bank and let us consider the decomposition of a binary representation of an address A in bit substrings A = ( A3 , A2 , A1 , A0 ), A0 is a c bit string: the displacement in the line. A1 and A2 are two n bits strings and A3 is the string of the q - (2 *n + c ) most significant bits.
+Let us consider T an integer such that 0 <=T < 2 n and Ť its binary opposite,( Ť = 2n - 1 - T ).
+Let ø be a Bit Permute Permutation on the set {0, ..  2n - 1 } (e.g. Identity, Perfect Shuffe, Bit Reversal).
+We consider the mapping functions defined respectively by:
+                                                           F0T,ø : S                ---> {0, .. ,2n+c  -1 }
+                                                                    ( A3 , A2  ,A1 , A0) ---> ( A1 XOR ( ø ( A2) . T ) , A0 )
+                                                           F1T,ø : S                ---> { 0, .. ,2n+c -1 }
+                                                                    ( A3 , A2 , A1,  A0 ) ---> ( A1 XOR ( ø ( A2) . T) , A0 )
+XOR is the exclusive OR and . is the bitwise product.
+These functions satisfy the criterions for "good" skewing functions defined in the paper (Equitability, inter-bank dispersion and local dispersion).
+Each bit of the F0T,ø ( A ) or F1T, ø ( A ) is either directly a bit of the binary representation of address A or the XOR of two bits of this binary representation.
+T may be chosen in order to allow symmetric design of the two cache banks: when n is even, having the same number of bits equal to one and zero seems an interesting approach.
+In the previous example in gure 9, T= 44 (binary decomposition 101010) and the Bit Permute Permutation is the identity.
+
+\includegraphics[width=15cm, height=20cm]{/home/diya/Desktop/images/IMG_20191031_161957.eps}
+
+Fig 8: An example of a two way skewed-associative Cache
+
+\textbf{\large IV. Replacement policies used }
+
+In Victim Chache -
+Cache controller work on predictability by taking the advantage of cache memory output. To design the cache controller various replacement policies can be used like FIFO, LRU, etc. Cache controller is used to track the cache miss induced in cache memory. When any address requested by microprocessor is not found in cachememory then cache miss will occur. Once the cache miss detect with the help of cache memory then cache controller will tracks the induced cache miss. If cache hit occurs then it will keep the older address same until the cache miss will occurs.
+
+\includegraphics[width=12cm, height=20cm]{/home/diya/Desktop/images/IMG_20191031_162907.eps}
+
+Fig 9: Cache Controller Flow Chart
+
+In two-way skewed-associative cache-
+When a miss occurs on a X-bank cache, the line of data to be replaced must be chosen among X lines. Different replacement policies may be used. LRU replacement policy or pseudo-random replacement policy are generally used in set-associative caches.
+The pseudo-random replacement policy is the simplest to implement. But LRU replacement policy
+generally works better and may be implemented at a reasonable hardware cost. Implementing a LRU replacement policy on a two-way set-associative cache is quite simple: a single bit tag per set sufficient.
+More generally a LRU replacement policy for a X-way associative is feasible with adding only X * ( X - 1) / 2 bit tags to each set.
+
+For two-way skewed-associative caches, a pseudo-LRU replacement policy may work fine:
+
+A tag bit is associated with each line in bank 0: when the line is indexed, the tag bit is asserted
+when the data was in bank 0 and deasserted when the data is in bank 1.
+On a miss, the tag of the line selected in bank 0 is read: when this tag is 1, the missing line is
+written in bank 1 otherwise the missing line is written in bank 0 .
+
+\textbf{\large IV. Implementation}
+
+In this project, we have simulated the function of a Cache. The project is implemented in C++. The simulator has the following capabilities:
+    1. The simulator models a 2-level caching system with L1(Level 1 cache) and L2 (Level 2 cache). These two levels of cache have 2(C1) and 2(C2) bytes of data storage, having 2(B1) -byte and 2(B2) -byte blocks, and with sets of 2(S1) blocks per set and 2(S2) blocks per set, respectively (note that S=0 is a direct-mapped cache, and S = C - B is a fully associative cache). Also note that the values are restricted to C2>=C1, B2>=B1 and S2>=S1. 
+    2. Both L1 and L2 caches use the LRU replacement policy. 
+    3. The simulator models a victim cache (“VC”) that holds V total blocks of size 2(B1) . V is in the range [0, 4]. The VC uses a FIFO replacement policy. 
+    4. If there is a miss to L1 cache and a hit in VC (say for block X), then block X is placed in L1. Here, the block that X replaces (say block Y) is placed in the VC. 
+    5. However, if there is a miss in both L1 and VC, then, the miss repair block (say block A) is fetched from L2 into L1. Block A then replaces block B in L1, which then replaces block C in the VC. Here, block C was the oldest (FIFO) block in the VC. If B is dirty, it must be written back to L2 and be marked as dirty. If B does not exist in L2 anymore, B must be allocated in L2 and marked as dirty. 
+    6. The memory addresses are 64-bit addresses. 
+    7. Caches are byte-addressable. 
+    8. The L1 cache implements a write-back, write-allocate (WBWA) policy. There is an additional dirty bit for each tag in the tag store of the L1 cache. 
+    9. If a victim cache is present (i.e., V > 0), when the L1 cache misses on a dirty block, it is written back to the L2 cache before it enters the victim cache: this means it is impossible to have dirty blocks in the victim cache. Thus the VC does not have an additional dirty bit per tag. 
+    10. The L2 cache also implements WBWA. There is an additional dirty bit for each tag in the tag store of the L2 cache. L2 is non-inclusive. 
+    11. There is an additional valid bit per block of storage overhead required in both L1 and L2. The valid bits are set to 0 when the simulation begins. 
+    12. If a dirty block hits in L2, it is be clean when bringing it to L1. 
+
+\textbf{\large References}
+
+[1]   Antonio Gonzalez, Mateo Valero, Nigel Topham and Joan M. Parcerisa, “ Eliminating Cache Conflict Misses Through XOR based Placement Functions “ , University of Edinburgh (UK)
+
+[2]    Andre Seznec, " A case for two-way skewed-associative caches" , Campus de Beaulieu, France
+
+[3]     L.K.Jhon, A.Subramanian, "Design and performance evaluation of a cache assist to implement selective caching" , Publisher: IEEE, 06 August 2002
+
+\end{document}
